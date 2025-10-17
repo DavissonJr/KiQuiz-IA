@@ -52,21 +52,6 @@ npm run dev
 # ou
 yarn dev
 ```
-## 5. Estrutura de Pastas
-   
-KiQuiz.io/
-│
-├─ public/             # Arquivos estáticos (imagens, favicon)
-├─ src/
-│  ├─ components/      # Componentes React
-│  ├─ pages/           # Páginas do app
-│  ├─ services/        # Integração com Gemini API
-│  ├─ types/           # Tipos TypeScript
-│  └─ App.tsx          # Componente principal
-├─ .env                # Variáveis de ambiente
-├─ package.json
-└─ vite.config.ts
-
 ## Melhorias Futuras
 
 Autenticação de usuários.
