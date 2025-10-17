@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { ClockLoader } from "react-spinners"; // Importe o spinner
+import { ClockLoader } from "react-spinners"; 
 
 interface QuizSetupProps {
   onStart: (topic: string, questionCount: number) => void;
   error?: string | null;
-  loading?: boolean; // Adicione loading como prop
+  loading?: boolean; 
 }
 
 const QuizSetup: React.FC<QuizSetupProps> = ({ onStart, error, loading = false }) => {

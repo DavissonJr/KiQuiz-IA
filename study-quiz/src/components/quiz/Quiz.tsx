@@ -5,7 +5,7 @@ interface QuizProps {
   topic: string;
   questionCount: number;
   questions: GeminiQuestion[];
-  onRestart: () => void; // Adicione esta linha
+  onRestart: () => void; 
 }
 
 const Quiz: React.FC<QuizProps> = ({ topic, questionCount, questions, onRestart }) => {
@@ -44,7 +44,6 @@ const Quiz: React.FC<QuizProps> = ({ topic, questionCount, questions, onRestart 
   const currentQuestion = questions[currentIndex];
   const progress = ((currentIndex + 1) / questionCount) * 100;
 
-  // Tela de resultados finais
   if (quizFinished) {
     const percentage = Math.round((score / questionCount) * 100);
     let message = "";

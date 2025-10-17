@@ -1,4 +1,3 @@
-// App.tsx
 import React, { useState } from "react";
 import { ClockLoader } from "react-spinners";
 import QuizSetup from "./components/quizSetup/QuizSetup";
@@ -124,7 +123,7 @@ const App: React.FC = () => {
         <QuizSetup 
           onStart={handleStart} 
           error={error} 
-          loading={loading} // Passe o loading como prop
+          loading={loading} 
         />
       ) : loading ? (
         <LoadingSpinner />
