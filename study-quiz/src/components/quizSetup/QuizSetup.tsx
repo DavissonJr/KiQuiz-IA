@@ -1,11 +1,13 @@
 import React, { useState } from "react";
+import { ClockLoader } from "react-spinners"; // Importe o spinner
 
 interface QuizSetupProps {
   onStart: (topic: string, questionCount: number) => void;
-  error?: string | null; // Adicione esta linha
+  error?: string | null;
+  loading?: boolean; // Adicione loading como prop
 }
 
-const QuizSetup: React.FC<QuizSetupProps> = ({ onStart, error }) => { // Adicione error aqui
+const QuizSetup: React.FC<QuizSetupProps> = ({ onStart, error, loading = false }) => {
   const [topic, setTopic] = useState("");
   const [questionCount, setQuestionCount] = useState(10);
 
@@ -62,9 +64,13 @@ const QuizSetup: React.FC<QuizSetupProps> = ({ onStart, error }) => { // Adicion
               boxShadow: "0 8px 25px rgba(102, 126, 234, 0.3)"
             }}
           >
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-            </svg>
+            {loading ? (
+              <ClockLoader color="white" size={30} />
+            ) : (
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+            )}
           </div>
         </div>
 
@@ -74,11 +80,11 @@ const QuizSetup: React.FC<QuizSetupProps> = ({ onStart, error }) => { // Adicion
           WebkitTextFillColor: "transparent",
           backgroundClip: "text"
         }}>
-          Configurar Quiz
+          {loading ? "Gerando Quiz..." : "Configurar Quiz"}
         </h2>
         
         <p className="text-muted mb-4 fs-6">
-          Escolha um tema fascinante e defina o desafio!
+          {loading ? "Preparando perguntas incríveis..." : "Escolha um tema fascinante e defina o desafio!"}
         </p>
 
         {/* Mostrar erro se existir */}
@@ -93,84 +99,114 @@ const QuizSetup: React.FC<QuizSetupProps> = ({ onStart, error }) => { // Adicion
           </div>
         )}
 
-        {/* Tema */}
-        <div className="mb-4 text-start">
-          <label className="form-label fw-semibold text-dark mb-3">
-            🎯 Tema do Quiz
-          </label>
-          <div className="input-group input-group-lg">
-            <span className="input-group-text bg-light border-end-0">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="#667eea" stroke="none">
-                <path d="M21.5 21.5L16.5 16.5M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"/>
+        {/* Conteúdo normal ou loading */}
+        {loading ? (
+          <div className="text-center py-4">
+            <div className="mb-3">
+              <ClockLoader color="#667eea" size={40} />
+            </div>
+            <p className="text-muted mb-3">
+              Gerando <strong>{questionCount}</strong> perguntas sobre <strong>"{topic}"</strong>
+            </p>
+            <div className="progress" style={{ height: "6px" }}>
+              <div 
+                className="progress-bar progress-bar-striped progress-bar-animated" 
+                style={{
+                  width: "100%",
+                  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+                }}
+              />
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Tema */}
+            <div className="mb-4 text-start">
+              <label className="form-label fw-semibold text-dark mb-3">
+                🎯 Tema do Quiz
+              </label>
+              <div className="input-group input-group-lg">
+                <span className="input-group-text bg-light border-end-0">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="#667eea" stroke="none">
+                    <path d="M21.5 21.5L16.5 16.5M19 11C19 15.4183 15.4183 19 11 19C6.58172 19 3 15.4183 3 11C3 6.58172 6.58172 3 11 3C15.4183 3 19 6.58172 19 11Z"/>
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  className="form-control border-start-0 ps-2"
+                  placeholder="Ex: JavaScript, História, Biologia..."
+                  value={topic}
+                  onChange={(e) => setTopic(e.target.value)}
+                  style={{ borderLeft: "none" }}
+                />
+              </div>
+            </div>
+
+            {/* Quantidade de perguntas */}
+            <div className="mb-5 text-start">
+              <label className="form-label fw-semibold text-dark mb-3">
+                📊 Quantidade de Perguntas: 
+                <span className="ms-2 badge bg-primary fs-6">{questionCount}</span>
+              </label>
+              <input
+                type="range"
+                className="form-range"
+                min="1"
+                max="50"
+                value={questionCount}
+                onChange={(e) => setQuestionCount(Number(e.target.value))}
+                style={{
+                  background: `linear-gradient(to right, #667eea 0%, #764ba2 ${(questionCount / 50) * 100}%, #e9ecef ${(questionCount / 50) * 100}%, #e9ecef 100%)`
+                }}
+              />
+              <div className="d-flex justify-content-between text-muted small mt-1">
+                <span>1</span>
+                <span>25</span>
+                <span>50</span>
+              </div>
+            </div>
+
+            {/* Botão iniciar */}
+            <button
+              onClick={handleStart}
+              disabled={!topic.trim()} // Desabilita se não tiver tema
+              className="btn btn-lg w-100 d-flex align-items-center justify-content-center gap-3 fw-semibold py-3"
+              style={{
+                background: !topic.trim() 
+                  ? "#6c757d" 
+                  : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                border: "none",
+                color: "white",
+                transition: "all 0.3s ease",
+                boxShadow: !topic.trim() ? "none" : "0 4px 15px rgba(102, 126, 234, 0.4)"
+              }}
+              onMouseEnter={(e) => {
+                if (topic.trim()) {
+                  e.currentTarget.style.transform = "translateY(-2px)";
+                  e.currentTarget.style.boxShadow = "0 8px 25px rgba(102, 126, 234, 0.6)";
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (topic.trim()) {
+                  e.currentTarget.style.transform = "translateY(0)";
+                  e.currentTarget.style.boxShadow = "0 4px 15px rgba(102, 126, 234, 0.4)";
+                }
+              }}
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="5,3 19,12 5,21" fill="currentColor"/>
               </svg>
-            </span>
-            <input
-              type="text"
-              className="form-control border-start-0 ps-2"
-              placeholder="Ex: JavaScript, História, Biologia..."
-              value={topic}
-              onChange={(e) => setTopic(e.target.value)}
-              style={{ borderLeft: "none" }}
-            />
-          </div>
-        </div>
+              {!topic.trim() ? "Digite um tema" : "Iniciar Quiz"}
+            </button>
 
-        {/* Quantidade de perguntas */}
-        <div className="mb-5 text-start">
-          <label className="form-label fw-semibold text-dark mb-3">
-            📊 Quantidade de Perguntas: 
-            <span className="ms-2 badge bg-primary fs-6">{questionCount}</span>
-          </label>
-          <input
-            type="range"
-            className="form-range"
-            min="1"
-            max="50"
-            value={questionCount}
-            onChange={(e) => setQuestionCount(Number(e.target.value))}
-            style={{
-              background: `linear-gradient(to right, #667eea 0%, #764ba2 ${(questionCount / 50) * 100}%, #e9ecef ${(questionCount / 50) * 100}%, #e9ecef 100%)`
-            }}
-          />
-          <div className="d-flex justify-content-between text-muted small mt-1">
-            <span>1</span>
-            <span>25</span>
-            <span>50</span>
-          </div>
-        </div>
-
-        {/* Botão iniciar */}
-        <button
-          onClick={handleStart}
-          className="btn btn-lg w-100 d-flex align-items-center justify-content-center gap-3 fw-semibold py-3"
-          style={{
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-            border: "none",
-            color: "white",
-            transition: "all 0.3s ease",
-            boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)"
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = "translateY(-2px)";
-            e.currentTarget.style.boxShadow = "0 8px 25px rgba(102, 126, 234, 0.6)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = "translateY(0)";
-            e.currentTarget.style.boxShadow = "0 4px 15px rgba(102, 126, 234, 0.4)";
-          }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polygon points="5,3 19,12 5,21" fill="currentColor"/>
-          </svg>
-          Iniciar Quiz
-        </button>
-
-        {/* Dica */}
-        <div className="mt-4">
-          <small className="text-muted">
-            💡 Dica: Seja específico no tema para perguntas mais relevantes
-          </small>
-        </div>
+            {/* Dica */}
+            <div className="mt-4">
+              <small className="text-muted">
+                💡 Dica: Seja específico no tema para perguntas mais relevantes
+              </small>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
