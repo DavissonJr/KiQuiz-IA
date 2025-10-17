@@ -7,9 +7,18 @@ export interface GeminiQuestion {
 interface GeminiResponse {
   candidates: {
     content: {
-      text: string;
-    }[];
+      parts: {
+        text: string;
+      }[];
+    };
+    finishReason: string;
+    index: number;
   }[];
+  usageMetadata?: {
+    promptTokenCount: number;
+    candidatesTokenCount: number;
+    totalTokenCount: number;
+  };
 }
 
 export const fetchQuizQuestions = async (
@@ -26,7 +35,9 @@ export const fetchQuizQuestions = async (
       "options": ["opção1", "opção2", "opção3", "opção4"],
       "correctAnswer": "opção correta"
     }
-  ]`;
+  ]
+  
+  Retorne APENAS o JSON, sem nenhum texto adicional.`;
 
   const payload = {
     contents: [
@@ -38,34 +49,45 @@ export const fetchQuizQuestions = async (
         ],
       },
     ],
+    generationConfig: {
+      responseMimeType: "application/json",
+    },
   };
 
-  const response = await fetch(
-    `${API_URL}?key=${import.meta.env.VITE_GEMINI_API_KEY}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    }
-  );
-
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Erro na API Gemini: ${response.status} ${errText}`);
-  }
-
-  const data: GeminiResponse = await response.json();
-
-  // O texto retornado pelo Gemini vem em data.candidates[0].content[0].text
-  const text = data.candidates[0].content[0].text;
-
   try {
-    const questions: GeminiQuestion[] = JSON.parse(text);
-    return questions;
-  } catch (err) {
-    console.error("Erro ao parsear JSON do Gemini:", text, err);
-    return [];
+    const response = await fetch(
+      `${API_URL}?key=${import.meta.env.VITE_GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Erro na API Gemini: ${response.status} ${errText}`);
+    }
+
+    const data: GeminiResponse = await response.json();
+
+    // Extrai o texto da resposta - note a estrutura diferente
+    const text = data.candidates[0].content.parts[0].text;
+
+    // Limpa o texto removendo markdown code blocks se existirem
+    const cleanText = text.replace(/```json\n?|\n?```/g, "").trim();
+
+    try {
+      const questions: GeminiQuestion[] = JSON.parse(cleanText);
+      return questions;
+    } catch (parseError) {
+      console.error("Erro ao parsear JSON do Gemini:", cleanText, parseError);
+      throw new Error("Formato de resposta inválido do Gemini");
+    }
+  } catch (error) {
+    console.error("Erro na requisição Gemini:", error);
+    throw error;
   }
 };

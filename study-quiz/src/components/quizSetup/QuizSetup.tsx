@@ -2,9 +2,10 @@ import React, { useState } from "react";
 
 interface QuizSetupProps {
   onStart: (topic: string, questionCount: number) => void;
+  error?: string | null; // Adicione esta linha
 }
 
-const QuizSetup: React.FC<QuizSetupProps> = ({ onStart }) => {
+const QuizSetup: React.FC<QuizSetupProps> = ({ onStart, error }) => { // Adicione error aqui
   const [topic, setTopic] = useState("");
   const [questionCount, setQuestionCount] = useState(10);
 
@@ -79,6 +80,18 @@ const QuizSetup: React.FC<QuizSetupProps> = ({ onStart }) => {
         <p className="text-muted mb-4 fs-6">
           Escolha um tema fascinante e defina o desafio!
         </p>
+
+        {/* Mostrar erro se existir */}
+        {error && (
+          <div className="alert alert-danger d-flex align-items-center" role="alert">
+            <svg width="20" height="20" className="me-2" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            <div>
+              {error}
+            </div>
+          </div>
+        )}
 
         {/* Tema */}
         <div className="mb-4 text-start">

@@ -10,34 +10,54 @@ const App: React.FC = () => {
   const [started, setStarted] = useState(false);
   const [questions, setQuestions] = useState<GeminiQuestion[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleStart = async (selectedTopic: string, count: number) => {
     setTopic(selectedTopic);
     setQuestionCount(count);
     setLoading(true);
+    setError(null);
 
     try {
       const quizQuestions = await fetchQuizQuestions(selectedTopic, count);
+      
+      if (quizQuestions.length === 0) {
+        throw new Error("Nenhuma questão foi gerada");
+      }
+      
       setQuestions(quizQuestions);
       setStarted(true);
     } catch (error) {
       console.error("Erro ao gerar quiz:", error);
-      alert("Ocorreu um erro ao gerar o quiz.");
+      setError(error instanceof Error ? error.message : "Erro desconhecido ao gerar quiz");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleRestart = () => {
+    setStarted(false);
+    setQuestions([]);
+    setError(null);
+    setTopic("");
+    setQuestionCount(0);
+  };
+
   return (
     <div>
       {!started ? (
-        <QuizSetup onStart={handleStart} />
+        <QuizSetup onStart={handleStart} error={error} />
       ) : loading ? (
         <div className="d-flex justify-content-center align-items-center vh-100">
           <h3>Gerando perguntas...</h3>
         </div>
       ) : (
-        <Quiz topic={topic} questionCount={questionCount} questions={questions} />
+        <Quiz 
+          topic={topic} 
+          questionCount={questionCount} 
+          questions={questions} 
+          onRestart={handleRestart}
+        />
       )}
     </div>
   );
